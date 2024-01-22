@@ -1,7 +1,6 @@
 console.log("Content script loaded");
 
 function triggerInputEvent(element) {
-    // Create and dispatch an 'input' event to mimic user interaction
     var event = new Event('input', { bubbles: true });
     element.dispatchEvent(event);
 }
@@ -10,75 +9,84 @@ function fillForm() {
     console.log("Attempting to fill the form");
 
     setTimeout(function() {
-        var labels = document.querySelectorAll('span');
-        console.log("Found labels:", labels.length);
+        var questions = document.querySelectorAll('div[role="heading"]');
+        console.log("Found questions:", questions.length);
 
-        labels.forEach(function(label) {
-            //console.log(label);
+        questions.forEach(function(question) {
+            var questionText = question.innerText.toLowerCase();
+            console.log("Question text:", questionText);
 
-            if (label.textContent.toLowerCase().includes("spotify")) {
-                var divId = label.closest('div[role="heading"]').id;
-                var textArea = document.querySelector(`textarea[aria-labelledby="${divId}"]`);
-                if (textArea) {
-                    textArea.value = 'https://open.spotify.com/track/6QqEX6Y6auPOXEMEhKfHyu?si=3777e750828643f6';
-                    triggerInputEvent(textArea);
-                    console.log("Filled a 'Spotify Track Link' textarea");
+            if (questionText.includes("artist name") || questionText.includes("artist") || questionText.includes(" name") ) {
+                var divId = question.id;
+                var inputField = document.querySelector(`input[aria-labelledby="${divId}"][jsname="YPqjbf"]`);
+                console.log("Found field for artist name", inputField);
+
+                if (inputField) {
+                    inputField.value = 'cosmic tides';
+                    triggerInputEvent(inputField);
+                    console.log("Filled an arist name no link");
                 }
             }
 
-            if (label.textContent.toLowerCase().includes("instagram")) {
-                var divId = label.closest('div[role="heading"]').id;
-                var inputField = document.querySelector(`input[aria-labelledby="${divId}"]`) || 
-                                 document.querySelector(`textarea[aria-labelledby="${divId}"]`);
+            if (questionText.includes("artistname - trackname")) {
+                var divId = question.id;
+                var inputField = document.querySelector(`input[aria-labelledby="${divId}"][jsname="YPqjbf"]`);
+                console.log("Found field for artist and song name link link:", inputField);
+
+                if (inputField) {
+                    inputField.value = 'cosmic tides - begin again';
+                    triggerInputEvent(inputField);
+                    console.log("Filled an arist name and track field");
+                }
+            }
+
+
+
+            if (questionText.includes("spotify")) {
+                var divId = question.id;
+                var inputField = document.querySelector(`input[aria-labelledby="${divId}"][jsname="YPqjbf"]`);
+
+                if(!inputField){
+                    var inputField = document.querySelector(`textarea[aria-labelledby="${divId}"][jsname="YPqjbf"]`);
+                }
+                console.log("Found field for Spotify link:", inputField);
+
+                if (inputField) {
+                    inputField.value = 'https://open.spotify.com/track/6QqEX6Y6auPOXEMEhKfHyu?si=cddb555229f64fd0';
+                    triggerInputEvent(inputField);
+                    console.log("Filled a 'Spotify Track Link' field");
+                }
+            }
+
+            if (questionText.includes("instagram")) {
+                var divId = question.id;
+                var inputField = document.querySelector(`input[aria-labelledby="${divId}"][jsname="YPqjbf"]`);
+                console.log("Found field for instagram link:", inputField);
+
                 if (inputField) {
                     inputField.value = '@cosmic.tides.lofi';
                     triggerInputEvent(inputField);
-                    console.log("Filled an 'Instagram' field");
-                } else {
-                    console.log("No Instagram field found");
+                    console.log("Filled an instragram link!");
                 }
             }
 
-            if (label.textContent.toLowerCase().includes("name")) {
-                var divId = label.closest('div[role="heading"]').id;
-                var inputField = document.querySelector(`input[aria-labelledby="${divId}"]`) || 
-                                 document.querySelector(`textarea[aria-labelledby="${divId}"]`);
-                if (inputField) {
-                    inputField.value = 'Cosmic Tides';
-                    triggerInputEvent(inputField);
-                    console.log("Filled a 'Name' field");
-                } else {
-                    console.log("No 'Name' field found");
-                }
-            }
+            if (questionText.includes("email") || questionText.includes("e-mail")) {
+                var divId = question.id;
+                var inputField = document.querySelector(`input[aria-labelledby="${divId}"][jsname="YPqjbf"]`);
+                if(!inputField){
+                    var inputField = document.querySelector(`input[type='email'][aria-labelledby="${divId}"]`);
 
-            if (label.textContent.toLowerCase().includes("comments")) {
-                var divId = label.closest('div[role="heading"]').id;
-                var inputField = document.querySelector(`input[aria-labelledby="${divId}"]`) || 
-                                 document.querySelector(`textarea[aria-labelledby="${divId}"]`);
-                if (inputField) {
-                    inputField.value = 'Thanks for listening to my music!';
-                    triggerInputEvent(inputField);
-                    console.log("Filled a 'Comments' field");
-                } else {
-                    console.log("No 'Comments' field found");
                 }
-            }
+                console.log("Found field for email link:", inputField);
 
-            if (label.textContent.toLowerCase().includes("email")) {
-                var divId = label.closest('div[role="heading"]').id;
-                var inputField = document.querySelector(`input[aria-labelledby="${divId}"]`) || 
-                                 document.querySelector(`textarea[aria-labelledby="${divId}"]`) ||
-                                 document.querySelector(`email[aria-labelledby="${divId}"]`) ;
-                console.log(inputField)
                 if (inputField) {
                     inputField.value = 'cosmic.tides.lofi@gmail.com';
                     triggerInputEvent(inputField);
-                    console.log("Filled an 'Email' field");
-                } else {
-                    console.log("No 'Email' field found");
+                    console.log("Filled a email field");
                 }
             }
+
+            // Repeat similar logic for other fields like 'Instagram', 'Name', etc.
         });
     }, 3000); // Delay of 3 seconds
 }
