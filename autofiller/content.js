@@ -28,6 +28,19 @@ function fillForm() {
                 }
             }
 
+            if (questionText.includes("track title") || questionText.includes("track name") || questionText.includes("track")
+            || questionText.includes("song")|| questionText.includes("song title")|| questionText.includes("song name") ) {
+                var divId = question.id;
+                var inputField = document.querySelector(`input[aria-labelledby="${divId}"][jsname="YPqjbf"]`);
+                console.log("Found field for track name", inputField);
+
+                if (inputField) {
+                    inputField.value = 'begin again';
+                    triggerInputEvent(inputField);
+                    console.log("Filled an track name");
+                }
+            }
+
             if (questionText.includes("artistname - trackname")) {
                 var divId = question.id;
                 var inputField = document.querySelector(`input[aria-labelledby="${divId}"][jsname="YPqjbf"]`);
@@ -41,8 +54,8 @@ function fillForm() {
             }
 
 
-
-            if (questionText.includes("spotify")) {
+            //Spotify link logic
+            if (questionText.includes("spotify") || questionText.includes("song link") ) {
                 var divId = question.id;
                 var inputField = document.querySelector(`input[aria-labelledby="${divId}"][jsname="YPqjbf"]`);
 
@@ -55,6 +68,23 @@ function fillForm() {
                     inputField.value = 'https://open.spotify.com/track/6QqEX6Y6auPOXEMEhKfHyu?si=cddb555229f64fd0';
                     triggerInputEvent(inputField);
                     console.log("Filled a 'Spotify Track Link' field");
+                }
+            }
+
+            //Comments and other things to add, add something positive about the song
+            if (questionText.includes("comments") || questionText.includes("add") || questionText.includes("additional")){
+                var divId = question.id;
+                var inputField = document.querySelector(`input[aria-labelledby="${divId}"][jsname="YPqjbf"]`);
+
+                if(!inputField){
+                    var inputField = document.querySelector(`textarea[aria-labelledby="${divId}"][jsname="YPqjbf"]`);
+                }
+                console.log("Found field for additional comments link:", inputField);
+
+                if (inputField) {
+                    inputField.value = 'Appreciate you listening! New music on the way! One Love! ';
+                    triggerInputEvent(inputField);
+                    console.log("Filled a 'comments and extras!");
                 }
             }
 
