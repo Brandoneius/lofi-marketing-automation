@@ -1,210 +1,123 @@
-var artistName = "cosmic tides";
-var songTitle = "begin again";
-var artistNameAndTrackSoundPlate = "cosmic tides - '" + songTitle  + "'";
-var artistEmail = "cosmic.tides.lofi@gmail.com";
-var artistSpotifyLink = "https://open.spotify.com/track/6QqEX6Y6auPOXEMEhKfHyu?si=cddb555229f64fd0";
-var artistInstagram = "@cosmic.tides.lofi";
-
-function triggerInputEvent(element) {
-    var event = new Event('input', { bubbles: true });
-    element.dispatchEvent(event);
-}
-
-function fillForm() {
-    console.log("Attempting to fill the form");
-
-    setTimeout(function() {
-        var questions = document.querySelectorAll('div[role="heading"]');
-        console.log("Found questions:", questions.length);
-
-        questions.forEach(function(question) {
-            var questionText = question.innerText.toLowerCase();
-            console.log("Question text:", questionText);
-
-            if (questionText.includes("artist name") || questionText.includes("artist") || questionText.includes(" name") ) {
-                var divId = question.id;
-                var inputField = document.querySelector(`input[aria-labelledby="${divId}"][jsname="YPqjbf"]`);
-                console.log("Found field for artist name", inputField);
-
-                if (inputField) {
-                    inputField.value = artistName;
+chrome.storage.sync.get(null, (autofillData) => {
+    if (!autofillData || !autofillData.artistName) {
+      console.warn("No autofill data found. Fill out the popup first.");
+      return;
+    }
+  
+    const artistName = autofillData.artistName || "";
+    const songTitle = autofillData.songTitle || "";
+    const artistNameAndTrackSoundPlate = `${artistName} - '${songTitle}'`;
+    const artistEmail = autofillData.email || "";
+    const artistSpotifyLink = autofillData.spotifyLink || "";
+    const artistInstagram = autofillData.instagram || "";
+    const artistComments = autofillData.comments || "Appreciate you listening! New music on the way! One Love! ";
+  
+    function triggerInputEvent(element) {
+      const event = new Event('input', { bubbles: true });
+      element.dispatchEvent(event);
+    }
+  
+    function triggerChangeEvent(element) {
+      const event = new Event('change', { bubbles: true });
+      element.dispatchEvent(event);
+    }
+  
+    function fillForm() {
+        console.log("Attempting to fill the form");
+      
+        setTimeout(() => {
+          const questions = document.querySelectorAll('div[role="heading"]');
+          console.log("Found questions:", questions.length);
+      
+          questions.forEach((question) => {
+            const questionText = question.innerText.toLowerCase();
+      
+            // Flexible autofill that tries multiple strategies
+            const matchAndFill = (keywords, value) => {
+                if (keywords.some(k => questionText.includes(k))) {
+                  const container = question.closest('div');
+                  const inputContainer = container?.parentElement?.parentElement?.nextElementSibling;
+              
+                  let inputField =
+                    inputContainer?.querySelector('input') ||
+                    inputContainer?.querySelector('textarea');
+              
+                  if (inputField) {
+                    inputField.value = value;
                     triggerInputEvent(inputField);
-                    console.log("Filled an arist name no link");
+                    console.log(`✅ Filled '${questionText}' with '${value}'`);
+                  } else {
+                    console.warn(`❌ Couldn't find input near '${questionText}'`);
+                  }
                 }
-            }
+              };
+              
+              
+              
+      
+            matchAndFill(["artist name", "artist", " name"], artistName);
+            matchAndFill(["track title", "track name", "track", "song", "song title", "song name"], songTitle);
+            matchAndFill(["artistname - trackname"], artistNameAndTrackSoundPlate);
+            matchAndFill(["spotify", "song link", "link to track"], artistSpotifyLink);
+            matchAndFill(["comments", "add", "additional"], artistComments);
+            matchAndFill(["instagram"], artistInstagram);
+            matchAndFill(["email", "e-mail"], artistEmail);
+          });
+        }, 2000);
 
-            if (questionText.includes("track title") || questionText.includes("track name") || questionText.includes("track")
-            || questionText.includes("song")|| questionText.includes("song title")|| questionText.includes("song name") ) {
-                var divId = question.id;
-                var inputField = document.querySelector(`input[aria-labelledby="${divId}"][jsname="YPqjbf"]`);
-                console.log("Found field for track name", inputField);
-
-                if (inputField) {
-                    inputField.value = songTitle;
-                    triggerInputEvent(inputField);
-                    console.log("Filled an track name");
-                }
-            }
-
-            if (questionText.includes("artistname - trackname")) {
-                var divId = question.id;
-                var inputField = document.querySelector(`input[aria-labelledby="${divId}"][jsname="YPqjbf"]`);
-                console.log("Found field for artist and song name link link:", inputField);
-
-                if (inputField) {
-                    inputField.value = artistNameAndTrackSoundPlate;
-                    triggerInputEvent(inputField);
-                    console.log("Filled an arist name and track field");
-                }
-            }
-
-
-            //Spotify link logic
-            if (questionText.includes("spotify") || questionText.includes("song link") || questionText.includes("link to track") ) {
-                var divId = question.id;
-                var inputField = document.querySelector(`input[aria-labelledby="${divId}"][jsname="YPqjbf"]`);
-
-                if(!inputField){
-                    var inputField = document.querySelector(`textarea[aria-labelledby="${divId}"][jsname="YPqjbf"]`);
-                }
-                console.log("Found field for Spotify link:", inputField);
-
-                if (inputField) {
-                    inputField.value = artistSpotifyLink;
-                    triggerInputEvent(inputField);
-                    console.log("Filled a 'Spotify Track Link' field");
-                }
-            }
-
-            //Comments and other things to add, add something positive about the song
-            if (questionText.includes("comments") || questionText.includes("add") || questionText.includes("additional")){
-                var divId = question.id;
-                var inputField = document.querySelector(`input[aria-labelledby="${divId}"][jsname="YPqjbf"]`);
-
-                if(!inputField){
-                    var inputField = document.querySelector(`textarea[aria-labelledby="${divId}"][jsname="YPqjbf"]`);
-                }
-                console.log("Found field for additional comments link:", inputField);
-
-                if (inputField) {
-                    inputField.value = 'Appreciate you listening! New music on the way! One Love! ';
-                    triggerInputEvent(inputField);
-                    console.log("Filled a 'comments and extras!");
-                }
-            }
-
-            if (questionText.includes("instagram")) {
-                var divId = question.id;
-                var inputField = document.querySelector(`input[aria-labelledby="${divId}"][jsname="YPqjbf"]`);
-                console.log("Found field for instagram link:", inputField);
-
-                if (inputField) {
-                    inputField.value = artistInstagram;
-                    triggerInputEvent(inputField);
-                    console.log("Filled an instragram link!");
-                }
-            }
-
-            if (questionText.includes("email") || questionText.includes("e-mail")) {
-                var divId = question.id;
-                var inputField = document.querySelector(`input[aria-labelledby="${divId}"][jsname="YPqjbf"]`);
-                if(!inputField){
-                    var inputField = document.querySelector(`input[type='email'][aria-labelledby="${divId}"]`);
-
-                }
-                console.log("Found field for email link:", inputField);
-
-                if (inputField) {
-                    inputField.value = artistEmail;
-                    triggerInputEvent(inputField);
-                    console.log("Filled a email field");
-                }
-            }
-
-            if (questionText.includes("email") || questionText.includes("e-mail")) {
-                var divId = question.id;
-                var inputField = document.querySelector(`input[aria-labelledby="${divId}"][type="email"]`);
-
-                if (!inputField) {
-                    inputField = document.querySelector(`input[type="email"][aria-labelledby="${divId}"]`);
-                }
-                console.log("Found field for email link:", inputField);
-
-                if (inputField) {
-                    inputField.value = artistEmail;
-                    triggerInputEvent(inputField);
-                    console.log("Filled an email field");
-                }
-            }
-
-            // Repeat similar logic for other fields like 'Instagram', 'Name', etc.
-
-            //Soundplate logic 
-            // let inputElement = document.querySelector(`input[name='input_1']`);
-            // inputElement.value = "cosmic tides - 'begin again'";
-            // console.log(inputElement);
-    
-
-        });
-    }, 2000); // Delay of 3 seconds
-
-
-    
-}
-
-//This is needed to trigger the changes for the drop down
-function triggerChangeEvent(element) {
-    var event = new Event('change', { bubbles: true });
-    element.dispatchEvent(event);
-}
-
-function fillFormSoundPlate() {
-    console.log("Attempting to fill the form on the new site");
-
-    setTimeout(function() {
-        //Artist name and track name formattted linkk
-        var inputField = document.querySelector(`input[name='input_1']`);
-        console.log("Found field with name 'input_1':", inputField);
-
-        if (inputField) {
-            inputField.value = artistNameAndTrackSoundPlate;
-            triggerInputEvent(inputField);
-            console.log("Artist name and track name filled out for 'input_1'");
+        // After the questions.forEach block:
+        const fallbackEmailField = document.querySelector('input[type="email"]');
+        if (fallbackEmailField) {
+        fallbackEmailField.value = artistEmail;
+        triggerInputEvent(fallbackEmailField);
+        console.log("✅ Fallback filled email field directly");
         }
-
-        //Spotify Link Input
-        var inputField3 = document.querySelector(`input[name='input_3']`);
-        if (inputField3){
-            inputField3.value = artistSpotifyLink;
-            triggerInputEvent(inputField3);
-            console.log("Artist spotify link filled out for 'input_3'");
+        
+      }
+      
+  
+    function fillFormSoundPlate() {
+      console.log("Attempting to fill the form on the new site");
+  
+      setTimeout(() => {
+        let input1 = document.querySelector(`input[name='input_1']`);
+        if (input1) {
+          input1.value = artistNameAndTrackSoundPlate;
+          triggerInputEvent(input1);
+          console.log("Filled 'input_1'");
         }
-
-        //Email Address input
-        var inputField4 = document.querySelector(`input[name='input_4']`);
-
-        if (inputField4){
-            inputField4.value = artistEmail;
-            triggerInputEvent(inputField4);
-            console.log("Artist email filled out for 'input_4'");
+  
+        let input3 = document.querySelector(`input[name='input_3']`);
+        if (input3) {
+          input3.value = artistSpotifyLink;
+          triggerInputEvent(input3);
+          console.log("Filled 'input_3'");
         }
-
-        var selectField = document.querySelector('select[name="input_5"]');
-        console.log("Found dropdown with name 'input_5':", selectField);
-
-        if (selectField) {
-            selectField.value = 'Chillhop/Beats';
-            triggerChangeEvent(selectField);
-            console.log("Option set for 'input_5'");
+  
+        let input4 = document.querySelector(`input[name='input_4']`);
+        if (input4) {
+          input4.value = artistEmail;
+          triggerInputEvent(input4);
+          console.log("Filled 'input_4'");
         }
-
-    }, 2000); // Delay of 2 seconds
-}
-
-
-if (document.readyState === "loading") {
-    document.addEventListener('DOMContentLoaded', fillForm);
-} else {
-    fillForm();  // The DOMContentLoaded event has already fired, call the function directly
-    fillFormSoundPlate();
-}
+  
+        let select5 = document.querySelector('select[name="input_5"]');
+        if (select5) {
+          select5.value = 'Chillhop/Beats';
+          triggerChangeEvent(select5);
+          console.log("Selected 'Chillhop/Beats'");
+        }
+      }, 2000);
+    }
+  
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", () => {
+        fillForm();
+        fillFormSoundPlate();
+      });
+    } else {
+      fillForm();
+      fillFormSoundPlate();
+    }
+  });
+  
