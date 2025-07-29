@@ -8,6 +8,43 @@ document.addEventListener('DOMContentLoaded', () => {
       document.getElementById('instagram').value = data.instagram || '';
       document.getElementById('comments').value = data.comments || '';
     });
+
+
+    document.getElementById("exportCSV").addEventListener("click", () => {
+        chrome.storage.sync.get("submissionLog", (data) => {
+          const log = data.submissionLog || [];
+      
+          if (log.length === 0) {
+            alert("No submissions to export.");
+            return;
+          }
+      
+          const headers = ["Artist", "Track", "Title", "URL", "Timestamp"];
+          const rows = log.map(entry => [
+            `"${entry.artist}"`,
+            `"${entry.track}"`,
+            `"${entry.title || ""}"`,
+            `"${entry.url}"`,
+            `"${new Date(entry.timestamp).toISOString()}"`
+          ]);
+      
+          const csvContent =
+            [headers.join(","), ...rows.map(r => r.join(","))].join("\n");
+      
+          const blob = new Blob([csvContent], { type: "text/csv" });
+          const url = URL.createObjectURL(blob);
+      
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = "submission_log.csv";
+          a.click();
+          URL.revokeObjectURL(url);
+        });
+      });
+      
+
+
+
   });
   
   // Save new data
@@ -25,4 +62,6 @@ document.addEventListener('DOMContentLoaded', () => {
       alert('Saved!');
     });
   });
+
+  
   
